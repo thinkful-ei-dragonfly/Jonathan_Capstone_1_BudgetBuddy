@@ -1,12 +1,11 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react'
+import Nav from './Nav/Nav'
+import './App.css'
 
 function App() {
   return (
     <body>
-    <nav role="navigation"><button>Sign Up</button>
-            <button>Log In</button></nav>
+    <Nav />
     <main role="main">
       <header role="banner">
         <h1>BudgetBuddy</h1>
