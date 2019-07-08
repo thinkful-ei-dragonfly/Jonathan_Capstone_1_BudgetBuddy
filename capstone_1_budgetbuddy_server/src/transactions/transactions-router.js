@@ -1,0 +1,115 @@
+const path = require('path')
+const express = require('express')
+const xss = require('xss')
+const TransactionsService = require('./transactions-service')
+
+const transactionsRouter = express.Router()
+const jsonParser = express.json()
+
+const serializeTransaction = transaction => ({
+  id: transaction.id,
+  date_added: transaction.date_added,
+  title: xss(transaction.title),
+  amount: transaction.amount,
+  user_id: transaction.user_id,
+  category: transaction.category,
+
+})
+
+transactionsRouter
+.route('/')
+.get((req, res, next) => {
+  const knexInstance = req.app.get('db')
+  TransactionsService.getAllTransactions(knexInstance)
+  .then(transactions => {
+    res.json(transactions.map(serializeTransaction))
+  })
+  .catch(next)
+})
+.post(jsonParser, (req, res, next) => {
+  const { title, amount, user_id, category } = req.body
+  const newTransaction = { title, amount, user_id, category }
+
+  for(const [key, value] of Object.entries(newTransaction))
+  if(value == null)
+  return res.status(400).json({
+    error: {
+      message: `Missing '${key}' in request body`
+    }
+  })
+
+  TransactionsService.insertTransaction(
+    req.app.get('db'),
+    newTransaction
+  )
+  .then(transaction => {
+    return res
+    .status(201)
+    .location(path.posix.join(req.originalUrl, `/${transaction.id}`))
+    .json(serializeTransaction(transaction))
+  })
+  .catch(next)
+})
+
+transactionsRouter
+.route('/:transaction_id')
+.all((req, res, next) => {
+  TransactionsService.getById(
+    req.app.get('db'),
+    req.params.transaction_id
+  )
+  .then(transaction => {
+    if(!transaction){
+      return res.status(404).json({
+        error: {
+          message: `Transaction doesn't exist`
+        }
+      })
+    }
+    res.transaction = transaction
+    next()
+  })
+  .catch(next)
+})
+.get((req, res, next) => {
+  res.json(serializeTransaction(res.transaction))
+})
+.delete((req, res, next) => {
+  TransactionsService.deleteTransaction(
+    req.app.get('db'),
+    req.params.transaction_id
+  )
+  .then(numRowsAffected => {
+    res.status(204).end()
+  })
+  .catch(next)
+})
+.patch(jsonParser, (req, res, next) => {
+  const { title, amount, user_id, category } = req.body
+  const transactionToUpdate = { title, amount, user_id, category }
+
+  const numberOfValues = Object.values(transactionToUpdate).filter(Boolean).length
+  if(numberOfValues === 0){
+    return res
+    .status(400)
+    .json({
+      error: {
+        message: `Request body must contain either 'title', 'amount', 'user_id', 'category'`
+      }
+    })
+  }
+
+  TransactionsService.updateTransaction(
+    req.app.get('db'),
+    req.params.transaction_id,
+    transactionToUpdate
+  )
+  .then(numRowsAffected => {
+    res
+    .status(204)
+    .end()
+  })
+  .catch(next)
+})
+
+module.exports = transactionsRouter

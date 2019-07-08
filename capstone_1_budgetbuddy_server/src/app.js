@@ -4,7 +4,10 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
+const pg = require('pg')
 const usersRouter = require('./users/users-router')
+const categoryRouter = require('./category/category-router')
+const transactionsRouter = require('./transactions/transactions-router')
 
 const app = express()
 
@@ -12,11 +15,15 @@ const morganOption = (NODE_ENV === 'production')
   ? 'tiny'
   : 'common';
 
+pg.types.setTypeParser(1700, parseFloat)
+
 app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
 
 app.use('/api/users', usersRouter)
+app.use('/api/categories', categoryRouter)
+app.use('/api/transactions', transactionsRouter)
 
 app.get('/', (req, res) => {
   res.send('Hello, world!')

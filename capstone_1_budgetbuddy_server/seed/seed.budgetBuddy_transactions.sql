@@ -1,6 +1,6 @@
-insert into transactions(user_id, title, amount)
+insert into transactions(title, amount, user_id, category)
 values
-(1, 'Chillis', 25.00),
-(1, 'Gas Station', 45.00),
-(2, 'Plane Tickets', 325.00),
-(3, 'Allowance for J', 1000.00);
+('Chillis', 25.00, 1, 4),
+('Gas Station', 45.37, 1, 1),
+('Plane Tickets', 325.00, 2, 3),
+('Allowance for J', 1000.00, 3, 5);
