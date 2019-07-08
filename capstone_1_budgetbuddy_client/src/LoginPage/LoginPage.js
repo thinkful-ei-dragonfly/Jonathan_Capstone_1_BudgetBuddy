@@ -5,7 +5,6 @@ export default class LoginPage extends React.Component{
   render(){
     return (
       <div>
-        <body>
     <nav role="navigation">Nav</nav>
     <main role="main">
       <header>
@@ -26,7 +25,6 @@ export default class LoginPage extends React.Component{
         </form>
       </section>
     </main>
-  </body>
       </div>
     )
   }

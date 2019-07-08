@@ -35,13 +35,13 @@ class App extends React.Component {
   }
   render(){
   return (
-    <body>
+    <div>
     <Nav />
     <main className ='App_main'>
       {this.renderMainRoutes()}
     </main>
     <footer role="content-info">Footer</footer>
-  </body>
+  </div>
   );
 }
 }
