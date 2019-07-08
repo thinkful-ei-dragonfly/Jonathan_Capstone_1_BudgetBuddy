@@ -5,6 +5,13 @@ const TransactionsService = {
     .from('transactions')
   },
 
+  getUserTransactions(knex, id){
+    return knex
+    .select('*')
+    .from('transactions')
+    .where('user_id', id)
+  },
+
   insertTransaction(knex, newTransaction){
     return knex
     .insert(newTransaction)

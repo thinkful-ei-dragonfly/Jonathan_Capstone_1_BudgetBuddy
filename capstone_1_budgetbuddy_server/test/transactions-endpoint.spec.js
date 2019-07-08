@@ -21,11 +21,12 @@ describe('Transactions Endpoints', () => {
 
   afterEach('cleanup', () => db.raw('TRUNCATE users, category, transactions RESTART IDENTITY CASCADE'))
 
-  describe(`GET /api/transactions`, () => {
+  describe(`GET /api/transactions/user/:user_id`, () => {
     context(`Given no transactions`, () => {
       it(`responds with 200 and an empty list`, () => {
+        const userId = 1
         return supertest(app)
-        .get('/api/transactions')
+        .get(`/api/transactions/user/${userId}`)
         .expect(200, [])
       })
     })
@@ -51,10 +52,12 @@ describe('Transactions Endpoints', () => {
         })
       })
 
-      it('responds with 200 and all of the transactions', () => {
+      it('responds with 200 and all of the transactions for a user', () => {
+        const userId = 1
+        const filteredTestTransactions = testTransactions.filter(transaction => transaction.user_id === userId)
         return supertest(app)
-        .get('/api/transactions')
-        .expect(200, testTransactions)
+        .get(`/api/transactions/user/${userId}`)
+        .expect(200, filteredTestTransactions)
       })
     })
 
@@ -80,8 +83,9 @@ describe('Transactions Endpoints', () => {
       })
 
       it(`removes XSS attack content`, () => {
+        const userId = 1
         supertest(app)
-        .get(`/api/transactions`)
+        .get(`/api/transactions/user/${userId}`)
         .expect(200)
         .expect(res => {
           expect(res.body[0].title).to.eql(expectedTransaction.title)
@@ -178,7 +182,7 @@ describe('Transactions Endpoints', () => {
 
 
 
-    describe(`POST /api/transactions`, () => {
+    describe(`POST /api/transactions/user/:user_id`, () => {
       const testUsers = makeUsersArray()
       const testCategories = makeCategoriesArray()
 
@@ -201,7 +205,7 @@ describe('Transactions Endpoints', () => {
           category: 1
         }
         return supertest(app)
-        .post('/api/transactions')
+        .post(`/api/transactions/user/${newTransaction.user_id}`)
         .send(newTransaction)
         .expect(201)
         .expect(res => {
@@ -231,9 +235,10 @@ describe('Transactions Endpoints', () => {
 
         it(`responds with 400 and an error message when the '${field}' is missing`, () => {
           delete newTransaction[field]
+          const userId = 1
 
           return supertest(app)
-          .post('/api/transactions')
+          .post(`/api/transactions/user/${userId}`)
           .send(newTransaction)
           .expect(400, {
             error: {
@@ -245,8 +250,9 @@ describe('Transactions Endpoints', () => {
       
       it('removes XSS attack content', () => {
         const { maliciousTransaction, expectedTransaction } = makeMaliciousTransaction()
+        const userId = 1
         return supertest(app)
-        .post(`/api/transactions`)
+        .post(`/api/transactions/user/${userId}`)
         .send(maliciousTransaction)
         .expect(201)
         .expect(res => {

@@ -15,12 +15,24 @@ const serializeTransaction = transaction => ({
   category: transaction.category,
 
 })
-
 transactionsRouter
 .route('/')
 .get((req, res, next) => {
   const knexInstance = req.app.get('db')
   TransactionsService.getAllTransactions(knexInstance)
+  .then(transactions => {
+    res.json(transactions.map(serializeTransaction))
+  })
+  .catch(next)
+})
+
+transactionsRouter
+.route('/user/:user_id')
+.get((req, res, next) => {
+  TransactionsService.getUserTransactions(
+    req.app.get('db'),
+    req.params.user_id
+  )
   .then(transactions => {
     res.json(transactions.map(serializeTransaction))
   })
@@ -45,7 +57,7 @@ transactionsRouter
   .then(transaction => {
     return res
     .status(201)
-    .location(path.posix.join(req.originalUrl, `/${transaction.id}`))
+    .location(path.posix.join('/api/transactions', `/${transaction.id}`))
     .json(serializeTransaction(transaction))
   })
   .catch(next)
