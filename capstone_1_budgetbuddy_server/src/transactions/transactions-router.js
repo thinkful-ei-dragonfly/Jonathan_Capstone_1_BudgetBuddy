@@ -2,6 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const TransactionsService = require('./transactions-service')
+const { requireAuth } = require('../middleware/basic-auth')
 
 const transactionsRouter = express.Router()
 const jsonParser = express.json()

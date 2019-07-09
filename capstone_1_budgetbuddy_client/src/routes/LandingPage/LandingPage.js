@@ -1,7 +1,7 @@
 import React from 'react'
-import SignupButton from '../SignupButton/SignupButton'
-import LoginButton from '../LoginButton/LoginButton'
-import MainHeader from '../MainHeader/MainHeader'
+import SignupButton from '../../components/SignupButton/SignupButton'
+import LoginButton from '../../components/LoginButton/LoginButton'
+import MainHeader from '../../components/MainHeader/MainHeader'
 
 export default class LandingPage extends React.Component {
   render() {

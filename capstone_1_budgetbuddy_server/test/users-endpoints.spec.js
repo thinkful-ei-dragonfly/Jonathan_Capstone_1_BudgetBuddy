@@ -1,6 +1,7 @@
 const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
+const bcrypt = require('bcryptjs')
 const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures')
 
 describe('Users Endpoints', () => {

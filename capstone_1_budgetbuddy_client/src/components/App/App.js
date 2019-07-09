@@ -1,10 +1,11 @@
 import React from 'react'
 import Nav from '../Nav/Nav'
-import LandingPage from '../LandingPage/LandingPage'
-import SignupPage from '../SignupPage/SignupPage'
-import LoginPage from '../LoginPage/LoginPage'
+import LandingPage from '../../routes/LandingPage/LandingPage'
+import SignupPage from '../../routes/SignupPage/SignupPage'
+import LoginPage from '../../routes/LoginPage/LoginPage'
 import { Route } from 'react-router-dom'
 import './App.css'
+import UserPage from '../../routes/UserPage/UserPage'
 
 
 class App extends React.Component {
@@ -29,6 +30,13 @@ class App extends React.Component {
       key='/login'
       path='/login'
       component={LoginPage}
+      />
+
+      <Route
+      exact
+      key='/user'
+      path='/user'
+      component={UserPage}
       />
       </>
     )
