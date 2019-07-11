@@ -11,20 +11,6 @@ export default class LoginForm extends React.Component{
 
   state = { error: null }
 
-  handleSubmitBasicAuth = e => {
-    e.preventDefault()
-    const { email, user_password } = e.target
-
-
-    TokenService.saveAuthToken(
-      TokenService.makeBasicAuthToken(email.value, user_password.value)
-    )
-
-    email.value = ''
-    user_password.value = ''
-    this.props.onLoginSuccess()
-  }
-
   handleSubmitJwtAuth = e => {
     e.preventDefault()
     this.setState({ error: null })
@@ -37,7 +23,7 @@ export default class LoginForm extends React.Component{
     .then(res => {
       email.value = ''
       user_password.value = ''
-      TokenService.saveAuthToken(res.authToken)
+      TokenService.saveAuthToken(res.authToken, res.user_id)
       this.props.onLoginSuccess()
     })
     .catch(res => {

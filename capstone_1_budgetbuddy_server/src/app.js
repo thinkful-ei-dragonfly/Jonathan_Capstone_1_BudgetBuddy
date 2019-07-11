@@ -22,6 +22,7 @@ app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
 
+// const jwtAuth = passport.
 app.use('/api/users', usersRouter)
 app.use('/api/categories', categoryRouter)
 app.use('/api/transactions', transactionsRouter)

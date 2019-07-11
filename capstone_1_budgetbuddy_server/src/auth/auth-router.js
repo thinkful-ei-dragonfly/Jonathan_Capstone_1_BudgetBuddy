@@ -2,6 +2,7 @@ const express = require('express')
 const AuthService = require('./auth-service')
 const authRouter = express.Router()
 const jsonBodyParser = express.json()
+const { requireAuth } = require('../middleware/jwt_auth')
 
 authRouter
 .post('/login', jsonBodyParser, (req, res, next) => {
@@ -26,14 +27,16 @@ authRouter
     
     return AuthService.comparePasswords(loginUser.user_password, dbUser.user_password)
     .then(compareMatch => {
-      if(!compareMatch)
+      if(!compareMatch){
       return res.status(400).json({
         error: 'Incorrect email or user_password'
       })
+    }
       const sub = dbUser.email
       const payload = { user_id: dbUser.id }
       res.send({
         authToken: AuthService.createJwt(sub, payload),
+        user_id: dbUser.id
       })
     })
     .catch(next)

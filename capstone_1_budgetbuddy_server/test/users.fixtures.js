@@ -1,6 +1,6 @@
 
 function makeUsersArray(){
-  return [
+  const testUsers = [
     {
       id: 1,
       first_name: 'Geoffrey',
@@ -23,6 +23,33 @@ function makeUsersArray(){
       user_password: '01010101010'
     }
   ]
+
+  const expectedUsers = [
+    
+    {
+      id: 1,
+      first_name: 'Geoffrey',
+      last_name: 'Butler',
+      email: 'geoffrey.butler@gmail.com',
+    },
+    {
+      id: 2,
+      first_name: 'Will',
+      last_name: 'Smith',
+      email: 'will.smith@gmail.com',
+    },
+    {
+      id: 3,
+      first_name: 'Carlton',
+      last_name: 'Banks',
+      email: 'carlton.banks@gmail.com',
+    }
+  
+  ]
+  return{
+    testUsers,
+    expectedUsers,
+  } 
 }
 
 function makeMaliciousUser(){
@@ -31,7 +58,7 @@ function makeMaliciousUser(){
     first_name: `Phillip <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">`,
     last_name: `Banks <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">`,
     email: `phillip.banks@gmail.com <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">`,
-    user_password: '01010101010'
+    user_password: 'Jm62920!'
   }
 
   const expectedUser = {

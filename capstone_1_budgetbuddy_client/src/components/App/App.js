@@ -6,9 +6,11 @@ import LoginPage from '../../routes/LoginPage/LoginPage'
 import { Route } from 'react-router-dom'
 import './App.css'
 import UserPage from '../../routes/UserPage/UserPage'
+import TransactionEntry from '../../routes/TransactionEntry/TransactionEntry'
 
 
 class App extends React.Component {
+
   renderMainRoutes(){
     return (
       <>
@@ -34,9 +36,16 @@ class App extends React.Component {
 
       <Route
       exact
-      key='/user'
-      path='/user'
+      key='/home'
+      path='/home'
       component={UserPage}
+      />
+
+      <Route
+      exact
+      key='/entry'
+      path='/entry'
+      component={TransactionEntry}
       />
       </>
     )

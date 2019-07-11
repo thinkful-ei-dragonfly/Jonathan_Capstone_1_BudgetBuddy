@@ -2,7 +2,7 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const TransactionsService = require('./transactions-service')
-const { requireAuth } = require('../middleware/basic-auth')
+const { requireAuth } = require('../middleware/jwt_auth')
 
 const transactionsRouter = express.Router()
 const jsonParser = express.json()
@@ -18,9 +18,11 @@ const serializeTransaction = transaction => ({
 })
 transactionsRouter
 .route('/')
+.all(requireAuth)
 .get((req, res, next) => {
-  const knexInstance = req.app.get('db')
-  TransactionsService.getAllTransactions(knexInstance)
+  TransactionsService.getAllTransactions(
+    req.app.get('db')
+  )
   .then(transactions => {
     res.json(transactions.map(serializeTransaction))
   })
@@ -29,10 +31,12 @@ transactionsRouter
 
 transactionsRouter
 .route('/user/:user_id')
+.all(requireAuth)
 .get((req, res, next) => {
   TransactionsService.getUserTransactions(
     req.app.get('db'),
     req.params.user_id
+    //req.user.id
   )
   .then(transactions => {
     res.json(transactions.map(serializeTransaction))
@@ -40,7 +44,7 @@ transactionsRouter
   .catch(next)
 })
 .post(jsonParser, (req, res, next) => {
-  const { title, amount, user_id, category } = req.body
+  const { date_added, title, amount, user_id, category } = req.body
   const newTransaction = { title, amount, user_id, category }
 
   for(const [key, value] of Object.entries(newTransaction))
@@ -50,6 +54,8 @@ transactionsRouter
       message: `Missing '${key}' in request body`
     }
   })
+
+  newTransaction.date_added = date_added
 
   TransactionsService.insertTransaction(
     req.app.get('db'),
@@ -66,7 +72,7 @@ transactionsRouter
 
 transactionsRouter
 .route('/:transaction_id')
-.all((req, res, next) => {
+.all(requireAuth, (req, res, next) => {
   TransactionsService.getById(
     req.app.get('db'),
     req.params.transaction_id

@@ -2,18 +2,17 @@ const path = require('path')
 const express = require('express')
 const xss = require('xss')
 const UsersService = require('./users-service')
-const bcrypt = require('bcryptjs')
+const { requireAuth } = require('../middleware/jwt_auth')
 
 const usersRouter = express.Router()
 const jsonParser = express.json()
+
 
 const serializeUser = user => ({
   id: user.id,
   first_name: xss(user.first_name),
   last_name: xss(user.last_name),
   email: xss(user.email),
-  user_password: user.user_password,
-
 })
 
 usersRouter
@@ -28,7 +27,7 @@ usersRouter
   })
   .post(jsonParser, (req, res, next) => {
     const { first_name, last_name, email, user_password } = req.body
-    const newUser = { first_name, last_name, email, user_password }
+    let newUser = { first_name, last_name, email, user_password }
 
     for (const [key, value] of Object.entries(newUser))
       if (value == null)
@@ -36,17 +35,50 @@ usersRouter
           error: { message: `Missing '${key}' in request body` }
         })
 
-    UsersService.insertUser(
-      req.app.get('db'),
-      newUser
-    )
-      .then(user => {
-        return res
-          .status(201)
-          .location(path.posix.join(req.originalUrl, `/${user.id}`))
-          .json(serializeUser(user))
+    const passwordError = UsersService.validatePassword(user_password)
+
+    if (passwordError)
+      return res.status(400).json({
+        error: passwordError
       })
-      .catch(next)
+
+      UsersService.hashPassword(user_password)
+      .then(hashedPassword => {
+        newUser = {
+          first_name,
+          last_name,
+          email,
+          user_password: hashedPassword,
+        }
+      })
+      .then(() => {
+        return UsersService.hasUserWithEmail(
+          req.app.get('db'),
+          email
+        )
+      })
+      .then(hasUserWithEmail => {
+        if(hasUserWithEmail){
+        return res.status(400).json({
+          error: 'An account with this email already exists'
+        })
+      }
+        else {
+          UsersService.insertUser(
+            req.app.get('db'),
+            newUser
+          )
+            .then(user => {
+              return res
+                .status(201)
+                .location(path.posix.join(req.originalUrl, `/${user.id}`))
+                .json(serializeUser(user))
+            })
+            .catch(next)
+        }
+      })
+  
+    
   })
 
 usersRouter

@@ -8,7 +8,7 @@ const { makeUsersArray } = require('./users.fixtures')
 describe('Auth Endpoints', function(){
   let db
 
-  const testUsers = makeUsersArray()
+  const { testUsers } = makeUsersArray()
   const testUser = testUsers[0]
   const mappedUsers = testUsers.map(testUser =>({...testUser, user_password: bcrypt.hashSync(testUser.user_password, 1)}) )
 

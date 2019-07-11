@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import MainHeader from '../../components/MainHeader/MainHeader'
 import ValidationError from '../../ValidationError/ValidationError'
 import BudgetBuddyForm from '../../components/BudgetBuddyForm/BudgetBuddyForm'
+import AuthApiService from '../../services/auth-api-service'
 import config from '../../config'
 import './SignupPage.css'
 
@@ -134,18 +135,7 @@ export default class SignupPage extends React.Component {
       email: e.target['email'].value,
       user_password: e.target['password'].value
     }
-    fetch(`${config.API_ENDPOINT}/users`, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify(user),
-    })
-      .then(res => {
-        if (!res.ok)
-          return res.json().then(e => Promise.reject(e))
-        return res.json()
-      })
+    AuthApiService.postUser(user)
       .then(user => {
         this.props.history.push(`/login`)
       })

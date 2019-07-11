@@ -1,9 +1,10 @@
 const { expect } = require('chai')
 const knex = require('knex')
 const app = require('../src/app')
-const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures')
-const { makeCategoriesArray, makeMaliciousCategory } = require('./category.fixtures')
+const { makeUsersArray } = require('./users.fixtures')
+const { makeCategoriesArray } = require('./category.fixtures')
 const { makeTransactionsArray, makeMaliciousTransaction } = require('./transactions.fixtures')
+const { makeAuthHeader } = require('./makeAuthHeader')
 
 describe('Transactions Endpoints', () => {
   let db
@@ -21,19 +22,84 @@ describe('Transactions Endpoints', () => {
 
   afterEach('cleanup', () => db.raw('TRUNCATE users, category, transactions RESTART IDENTITY CASCADE'))
 
+
   describe(`GET /api/transactions/user/:user_id`, () => {
-    context(`Given no transactions`, () => {
-      it(`responds with 200 and an empty list`, () => {
+  
+    context(`Given no authorization`, () => {
+      const testTransactions = makeTransactionsArray()
+      const { testUsers } = makeUsersArray()
+      const testCategories = makeCategoriesArray()
+
+      beforeEach('insert transactions', () => {
+        return db
+        .into('users')
+        .insert(testUsers)
+        .then(() => {
+          return db
+          .into('category')
+          .insert(testCategories)
+          .then(() => {
+            return db
+            .into('transactions')
+            .insert(testTransactions)
+          })
+        })
+      })
+
+      it(`responds 401 'Missing bearer token' when no bearer token`, () => {
         const userId = 1
         return supertest(app)
         .get(`/api/transactions/user/${userId}`)
+        .expect(401, {
+          error:'Missing bearer token'
+        })
+      })
+
+      it(`responds 401 'Unauthorized request' when invalid JWT secret`, () => {
+        const validUser = testUsers[0]
+        const invalidSecret = 'bad-secret'
+        const userId = 1
+        return supertest(app)
+        .get(`/api/transactions/user/${userId}`)
+        .set('Authorization', makeAuthHeader(validUser, invalidSecret))
+        .expect(401, {
+          error: 'Unauthorized request'
+        })
+      })
+
+      it(`responds 401 'Unauthorized request' when invalid sub in payload`, () => {
+        const invalidUser = { email: 'user-not@email.com', id: 1 }
+        const userId = 1
+        return supertest(app)
+        .get(`/api/transactions/user/${userId}`)
+        .set('Authorization', makeAuthHeader(invalidUser))
+        .expect(401, {
+          error: 'Unauthorized request'
+        })
+      })
+    })
+
+    context(`Given no transactions`, () => {
+      const { testUsers } = makeUsersArray()
+      beforeEach('insert users', () => {
+        return db
+        .into('users')
+        .insert(testUsers)
+      })
+
+      it(`responds with 200 and an empty list`, () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
+        const userId = 1
+        return supertest(app)
+        .get(`/api/transactions/user/${userId}`)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(200, [])
       })
     })
 
     context(`Given there are transactions in the database`, () => {
       const testTransactions = makeTransactionsArray()
-      const testUsers = makeUsersArray()
+      const { testUsers } = makeUsersArray()
       const testCategories = makeCategoriesArray()
 
       beforeEach('insert transactions', () => {
@@ -53,17 +119,19 @@ describe('Transactions Endpoints', () => {
       })
 
       it('responds with 200 and all of the transactions for a user', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const userId = 1
         const filteredTestTransactions = testTransactions.filter(transaction => transaction.user_id === userId)
         return supertest(app)
         .get(`/api/transactions/user/${userId}`)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(200, filteredTestTransactions)
       })
     })
 
     context(`Given an XSS attack transaction`, () => {
       const { maliciousTransaction, expectedTransaction } = makeMaliciousTransaction()
-      const testUsers = makeUsersArray()
+      const { testUsers } = makeUsersArray()
       const testCategories = makeCategoriesArray()
 
       beforeEach('insert malicious transaction', () => {
@@ -83,9 +151,11 @@ describe('Transactions Endpoints', () => {
       })
 
       it(`removes XSS attack content`, () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const userId = 1
         supertest(app)
         .get(`/api/transactions/user/${userId}`)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(200)
         .expect(res => {
           expect(res.body[0].title).to.eql(expectedTransaction.title)
