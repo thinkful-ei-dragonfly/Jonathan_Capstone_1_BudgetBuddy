@@ -1,13 +1,16 @@
 import React from 'react'
-import Nav from '../Nav/Nav'
+import Footer from '../Footer/Footer'
 import LandingPage from '../../routes/LandingPage/LandingPage'
 import SignupPage from '../../routes/SignupPage/SignupPage'
 import LoginPage from '../../routes/LoginPage/LoginPage'
+import DeleteAccount from '../../routes/DeleteAccount/DeleteAccount'
 import { Route } from 'react-router-dom'
 import './App.css'
 import UserPage from '../../routes/UserPage/UserPage'
 import TransactionEntry from '../../routes/TransactionEntry/TransactionEntry'
 import TokenService from '../../services/token-service'
+import EditAccountPage from '../../routes/EditAccountPage/EditAccountPage'
+import ChangeFirstName from '../../routes/ChangeFirstName/ChangeFirstName'
 
 
 class App extends React.Component {
@@ -15,16 +18,33 @@ class App extends React.Component {
   renderMainRoutes(){
     const authorized = TokenService.hasAuthToken()
     let page
-
+    let entry
+    let edit
+    let deletePage
+    let changeFirstName
+    
     if(authorized){
       page = UserPage
+      entry = TransactionEntry
+      edit = EditAccountPage
+      deletePage = DeleteAccount
     }
     else{
       page = LandingPage
+      entry = LandingPage
+      edit = LandingPage
+      deletePage = LandingPage
     }
 
     return (
       <>
+      <Route
+      exact
+      key='/about'
+      path='/about'
+      component={LandingPage}
+      />
+      
       <Route
       exact
       path='/'
@@ -56,8 +76,21 @@ class App extends React.Component {
       exact
       key='/entry'
       path='/entry'
-      component={TransactionEntry}
+      component={entry}
       />
+
+      <Route
+      exact
+      key='/edit_account'
+      path='/edit_account'
+      component={edit}
+      />
+
+      <Route 
+      exact
+      key='/delete_account'
+      path='/delete_account'
+      component={deletePage}/>
       </>
     )
   }
@@ -68,7 +101,7 @@ class App extends React.Component {
     <main className ='App_main'>
       {this.renderMainRoutes()}
     </main>
-    <footer role="content-info">Footer</footer>
+    <Footer />
   </div>
   );
 }

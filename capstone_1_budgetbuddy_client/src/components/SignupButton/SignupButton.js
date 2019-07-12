@@ -5,7 +5,7 @@ import './SignupButton.css'
 export default class SignupButton extends React.Component {
   render(){
     return (
-    <Link to='/signup'><button>Sign Up</button></Link>
+    <Link to='/signup'>Sign Up</Link>
     )
   }
 }

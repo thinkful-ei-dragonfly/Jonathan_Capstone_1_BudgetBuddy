@@ -5,7 +5,6 @@ import config from '../../config'
 import { format } from 'date-fns'
 import './UserPage.css'
 import TokenService from '../../services/token-service'
-import TransactionEntry from '../TransactionEntry/TransactionEntry'
 import AuthApiService from '../../services/auth-api-service'
 import TransactionTable from '../../components/TransactionTable/TransactionTable'
 
@@ -37,8 +36,10 @@ export default class UserPage extends React.Component {
           transactionsRes.json(),
           categoriesRes.json(),
         ])
+
       })
       .then(([transactions, categories]) => {
+        console.log(categories)
         this.setState({ transactions, categories })
       })
       .catch(error => {
@@ -67,6 +68,9 @@ export default class UserPage extends React.Component {
       case 6:
         word = 'Fitness'
         break
+      case 7:
+        word = 'Work'
+        break
       default:
         word = 'Other'
     }
@@ -74,7 +78,7 @@ export default class UserPage extends React.Component {
   }
 
   handleMonthFilter = e => {
-    this.setState({ 
+    this.setState({
       month: e.target.value
     })
   }
@@ -87,8 +91,7 @@ export default class UserPage extends React.Component {
 
   handleDeleteTransaction = e => {
     e.preventDefault()
-    const id = e.target['id'].value
-    console.log(id)
+    const id = this.state.transactions.id
     AuthApiService.deleteTransaction(id)
       .then(transaction => {
         this.props.history.push(`/home`)
@@ -137,7 +140,7 @@ export default class UserPage extends React.Component {
             <option value="">Select Month</option>
             <option value="01">January</option>
             <option value="02">February</option>
-            <option value ="03">March</option>
+            <option value="03">March</option>
             <option value="04">April</option>
             <option value="05">May</option>
             <option value="06">June</option>
@@ -149,13 +152,13 @@ export default class UserPage extends React.Component {
             <option value="12">December</option>
           </select>
           <div>
-          <label htmlFor='category'>Category </label>
-          <select onChange={this.handleCategoryFilter} name="category">
-            <option value="">Select Category </option>
-            {this.state.categories.map(category => {
-              return <option value={category.category}>{category.category}</option>
-            })}
-          </select>
+            <label htmlFor='category'>Category </label>
+            <select onChange={this.handleCategoryFilter} name="category">
+              <option value="">Select Category </option>
+              {this.state.categories.map(category => {
+                return <option value={category.category}>{category.category}</option>
+              })}
+            </select>
           </div>
 
           <section>

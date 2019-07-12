@@ -5,7 +5,7 @@ import './LoginButton.css'
 export default class LoginButton extends React.Component{
   render(){
     return (
-      <Link to='/login'><button>Log In</button></Link>
+      <Link to='/login'>Log In</Link>
     )
   }
 }

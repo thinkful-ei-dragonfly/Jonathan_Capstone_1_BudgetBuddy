@@ -3,6 +3,7 @@ const knex = require('knex')
 const app = require('../src/app')
 const bcrypt = require('bcryptjs')
 const { makeUsersArray, makeMaliciousUser } = require('./users.fixtures')
+const { makeAuthHeader } = require('./makeAuthHeader')
 
 describe('Users Endpoints', () => {
   let db
@@ -77,10 +78,8 @@ describe('Users Endpoints', () => {
         const userId = 123456
         return supertest(app)
           .get(`/api/users/${userId}`)
-          .expect(404, {
-            error: {
-              message: `User doesn't exist`
-            }
+          .expect(401, {
+            error: `Missing bearer token` 
           })
       })
     })
@@ -95,15 +94,18 @@ describe('Users Endpoints', () => {
       })
 
       it('responds with 200 and the specified user', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const userId = 2
         const expectedUser = expectedUsers[userId - 1]
         return supertest(app)
           .get(`/api/users/${userId}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(200, expectedUser)
       })
     })
 
     context(`Given an XSS attack User`, () => {
+      const { testUsers } = makeUsersArray()
       const maliciousUser = {
         id: 911,
         first_name: `Phillip <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">`,
@@ -115,12 +117,19 @@ describe('Users Endpoints', () => {
       beforeEach('insert malicious user', () => {
         return db
           .into('users')
-          .insert(maliciousUser)
+          .insert(testUsers)
+          .then(()=> {
+            return db
+            .into('users')
+            .insert(maliciousUser)
+          })
       })
 
       it('removes XSS attack content', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         return supertest(app)
           .get(`/api/users/${maliciousUser.id}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(200)
           .expect(res => {
             expect(res.body.first_name).to.eql(`Phillip <img src="https://url.to.file.which/does-not.exist">`)
@@ -328,10 +337,12 @@ describe('Users Endpoints', () => {
       })
 
       it('responds with 204 and removes the user', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const idToRemove = 2
         const expectedUsersArray = expectedUsers.filter(user => user.id !== idToRemove)
         return supertest(app)
           .delete(`/api/users/${idToRemove}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(204)
           .then(res =>
             supertest(app)
@@ -346,10 +357,8 @@ describe('Users Endpoints', () => {
         const userId = 123456
         return supertest(app)
           .delete(`/api/users/${userId}`)
-          .expect(404, {
-            error: {
-              message: `User doesn't exist`
-            }
+          .expect(401, {
+            error: `Missing bearer token` 
           })
       })
     })
@@ -363,10 +372,8 @@ describe('Users Endpoints', () => {
         const userId = 123456
         return supertest(app)
           .patch(`/api/users/${userId}`)
-          .expect(404, {
-            error: {
-              message: `User doesn't exist`
-            }
+          .expect(401, {
+            error: `Missing bearer token` 
           })
       })
     })
@@ -381,6 +388,7 @@ describe('Users Endpoints', () => {
       })
 
       it('responds with 204 and updates the user', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const idToUpdate = 2
         const updateUser = {
           first_name: 'Phillip',
@@ -397,19 +405,23 @@ describe('Users Endpoints', () => {
         return supertest(app)
         .patch(`/api/users/${idToUpdate}`)
         .send(updateUser)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(204)
         .then(res =>
           supertest(app)
           .get(`/api/users/${idToUpdate}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(expectedUser)
           )
       })
 
       it(`responds with 400 when no required fields supplied`, () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const idToUpdate = 2
         return supertest(app)
         .patch(`/api/users/${idToUpdate}`)
         .send({ irrelevantField: 'foo' })
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(400, {
           error: {
             message: `Request body must contain either 'first_name', 'last_name', 'email', 'user_password'`
@@ -418,6 +430,7 @@ describe('Users Endpoints', () => {
       })
 
       it(`responds with 204 when updating only a subset of fields`, () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const idToUpdate = 2
         const updateUser = {
           email: 'update@gmail.com',
@@ -433,10 +446,12 @@ describe('Users Endpoints', () => {
           ...updateUser,
           fieldToIgnore: 'should not be in the GET response'
         })
+        .set("Authorization", makeAuthHeader(validCreds))
         .expect(204)
         .then(res => 
           supertest(app)
           .get(`/api/users/${idToUpdate}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(expectedUser))
       })
     })

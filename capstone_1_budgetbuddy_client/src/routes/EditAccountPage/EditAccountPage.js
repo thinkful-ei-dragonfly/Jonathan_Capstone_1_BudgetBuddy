@@ -1,13 +1,12 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
-import MainHeader from '../../components/MainHeader/MainHeader'
 import ValidationError from '../../ValidationError/ValidationError'
 import BudgetBuddyForm from '../../components/BudgetBuddyForm/BudgetBuddyForm'
 import AuthApiService from '../../services/auth-api-service'
-import config from '../../config'
-import './SignupPage.css'
+import MainHeader from '../../components/MainHeader/MainHeader'
+import { Link } from 'react-router-dom'
+import './EditAccountPage.css'
 
-export default class SignupPage extends React.Component {
+export default class EditAccountPage extends React.Component{
   constructor(props) {
     super(props)
     this.state = {
@@ -124,7 +123,7 @@ export default class SignupPage extends React.Component {
 
   formValid() {
     this.setState({
-      form_valid: this.state.first_name_valid && this.state.last_name_valid && this.state.email_valid && this.state.user_password_valid
+      form_valid: this.state.first_name_valid || this.state.last_name_valid || this.state.email_valid || this.state.user_password_valid
     })
   }
 
@@ -136,60 +135,61 @@ export default class SignupPage extends React.Component {
       email: e.target['email'].value,
       user_password: e.target['password'].value
     }
-    AuthApiService.postUser(user)
+    AuthApiService.updateUser(user)
       .then(user => {
-        this.props.history.push(`/login`)
+        this.props.history.push(`/user`)
       })
       .catch(res => {
         this.setState({
           error: res.error
         })
+
       })
   }
-  render() {
+
+  render(){
     const { first_name_valid, last_name_valid, email_valid, user_password_valid, validationMessages } = this.state
-    return (
+    return(
       <div>
         <main role="main">
           <header>
             <MainHeader />
-            <h2>Sign Up</h2>
+            <h2>Edit Account</h2>
           </header>
           <section>
             <BudgetBuddyForm onSubmit={this.handleSubmit} >
               <div className='field'>
-                <label htmlFor="first-name">First name
+                <label htmlFor="first-name">Change First name
               {!first_name_valid && (
                     <p className="error">{validationMessages.first_name}</p>)}</label>
                 <input placeholder='First Name' type="text" name='first-name' id='first-name' onChange={e => this.setFirstName(e.target.value)} />
                 <ValidationError hasError={!this.state.first_name_valid} message={this.state.validationMessages.first_name} />
               </div>
               <div className='field'>
-                <label htmlFor="last-name">Last name
+                <label htmlFor="last-name">Change Last name
               {!last_name_valid && (
                     <p className="error">{validationMessages.last_name}</p>)}</label>
                 <input type="text" name='last-name' id='last-name' placeholder='Last Name' onChange={e => this.setLastName(e.target.value)} />
                 <ValidationError hasError={!this.state.last_name_valid} message={this.state.validationMessages.last_name} />
               </div>
               <div className='field'>
-                <label htmlFor="username">Email
+                <label htmlFor="username">Change Email
               {!email_valid && (
                     <p className="error">{validationMessages.email}</p>)}</label>
-                <input type="text" name='email' id='email' onChange={e => this.setEmail(e.target.value)} />
+                <input type="text" name='email' id='email' placeholder='email@email.com' onChange={e => this.setEmail(e.target.value)} />
                 <p className="submission-error">{this.state.error}</p>
                 <ValidationError hasError={!this.state.email_valid} message={this.state.validationMessages.email} />
               </div>
               <div className='field'>
-                <label htmlFor="password">Password
+                <label htmlFor="password">Change Password
               {!user_password_valid && (
                     <p className="error">{validationMessages.user_password}</p>)}</label>
-                <input type="password" name='password' id='password' onChange={e => this.setPassword(e.target.value)} />
+                <input type="password" name='password' id='password' placeholder='*******' onChange={e => this.setPassword(e.target.value)} />
                 <ValidationError hasError={!this.state.user_password_valid} message={this.state.validationMessages.user_password} />
               </div>
-              <button type='submit' disabled={!this.state.form_valid}>Sign Up</button>
+              <button type='submit' disabled={!this.state.form_valid}>Update</button>
+              <Link to='/delete_account'><button>Delete Account</button></Link>
             </BudgetBuddyForm>
-            <p>Already have an account?<Link to='/login'><button>Log in</button></Link>
-            </p>
           </section>
         </main>
       </div>

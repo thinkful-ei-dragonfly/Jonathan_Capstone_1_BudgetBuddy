@@ -5,4 +5,6 @@ values
 ('Travel'),
 ('Dining'),
 ('Entertainment'),
-('Fitness');
+('Fitness'),
+('Work'),
+('Other');

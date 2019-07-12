@@ -1,13 +1,14 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import TokenService from '../../services/token-service'
-import SignupButton from '../SignupButton/SignupButton';
-import LoginButton from '../LoginButton/LoginButton';
+import SignupButton from '../SignupButton/SignupButton'
+import LoginButton from '../LoginButton/LoginButton'
+import './Footer.css'
 
-export default class MainHeader extends React.Component {
+export default class Footer extends React.Component{
   handleLogoutClick = () => {
     TokenService.clearAuthToken()
-    document.location.assign('http://localhost:3000/login')
+    document.location.assign('http://localhost:3000/')
   }
   renderLoginLink() {
     return (
@@ -35,17 +36,18 @@ export default class MainHeader extends React.Component {
       </div>
     )
   }
+
   render(){
-    return (
+    return(
       <div>
-      <header role="banner">
-        <Link to='/'><h1>BudgetBuddy</h1></Link>
+        <footer role="content-info">
+          <Link to='/about'>About</Link>
+          <span className='Hyph'> - </span>
         {TokenService.hasAuthToken()
           ? this.renderLogOutLink()
           : this.renderLoginLink()
       }
-      <Link to='/home'>Home</Link>
-      </header>
+    </footer>
       </div>
     )
   }

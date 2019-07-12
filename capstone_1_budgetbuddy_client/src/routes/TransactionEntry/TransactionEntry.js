@@ -8,9 +8,39 @@ import config from '../../config'
 
 export default class TransactionEntry extends React.Component{
  state ={
+   transactions: [],
    categories: []
  }
-  
+ componentDidMount() {
+  Promise.all([
+    fetch(`${config.API_ENDPOINT}/transactions/user/${TokenService.getUserID()}`, {
+      headers: {
+        'authorization': `bearer ${TokenService.getAuthToken()}`,
+      }
+    }),
+    fetch(`${config.API_ENDPOINT}/categories`)
+  ])
+    .then(([transactionsRes, categoriesRes]) => {
+      if (!transactionsRes.ok)
+        return transactionsRes.json().then(e => Promise.reject(e))
+      if (!categoriesRes.ok)
+        return categoriesRes.json().then(e => Promise.reject(e))
+
+      return Promise.all([
+        transactionsRes.json(),
+        categoriesRes.json(),
+      ])
+      
+    })
+    .then(([transactions, categories]) => {
+      this.setState({ transactions, categories })
+    })
+    .catch(error => {
+      console.error({ error })
+    })
+
+}
+
   handleSubmit = e => {
     let amount = null
     if(e.target['type'].value === 'Withdrawal'){
@@ -27,7 +57,6 @@ export default class TransactionEntry extends React.Component{
       user_id: TokenService.getUserID(),
       category: e.target['category'].value,
     }
-    console.log(transaction)
     AuthApiService.postTransaction(transaction)
     .then(transaction => {
       this.props.history.push(`/home`)
@@ -37,7 +66,10 @@ export default class TransactionEntry extends React.Component{
     })
   }
   render(){
-
+    let categories = []
+    if(this.state.categories.length > 0){
+      categories = this.state.categories.map(category => <option value={category.id}>{category.category}</option>)
+    }
     return(
       <div>
     <main role="main">
@@ -65,12 +97,7 @@ export default class TransactionEntry extends React.Component{
               <div>
                 <label htmlFor="category">Category</label>
                 <select name="category">
-                  <option value="1">Gas</option>
-                  <option value="2">Groceries</option>
-                  <option value="3">Travel</option>
-                  <option value="4">Dining</option>
-                  <option value="5">Entertainment</option>
-                  <option value="6">Fitness</option>
+                  {categories}
                 </select>
               </div>
             <button type='submit'>Submit</button>
