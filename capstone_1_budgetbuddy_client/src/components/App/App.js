@@ -10,7 +10,7 @@ import UserPage from '../../routes/UserPage/UserPage'
 import TransactionEntry from '../../routes/TransactionEntry/TransactionEntry'
 import TokenService from '../../services/token-service'
 import EditAccountPage from '../../routes/EditAccountPage/EditAccountPage'
-import ChangeFirstName from '../../routes/ChangeFirstName/ChangeFirstName'
+
 
 
 class App extends React.Component {
@@ -21,7 +21,7 @@ class App extends React.Component {
     let entry
     let edit
     let deletePage
-    let changeFirstName
+    
     
     if(authorized){
       page = UserPage

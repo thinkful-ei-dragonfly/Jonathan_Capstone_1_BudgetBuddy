@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "alias": "budgetbuddy-app",
+  "name": "capstone_1_budgetbuddy_client",
+  "routes": [
+      {
+        "src": "^/static/(.*)",
+        "dest": "/static/$1"
+      },
+      {
+        "src": ".*",
+        "dest": "/index.html"
+      }
+  ]
+}

@@ -39,7 +39,6 @@ export default class UserPage extends React.Component {
 
       })
       .then(([transactions, categories]) => {
-        console.log(categories)
         this.setState({ transactions, categories })
       })
       .catch(error => {

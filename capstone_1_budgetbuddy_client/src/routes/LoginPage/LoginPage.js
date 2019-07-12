@@ -12,7 +12,8 @@ export default class LoginPage extends React.Component{
   }
 
   handleLoginSuccess = () => {
-    document.location.assign('http://localhost:3000/home')
+    console.log(window.location)
+    document.location.assign('https://capstone1budgetbuddyclient.jmjonemoore.now.sh/home')
   }
   render(){
     return (

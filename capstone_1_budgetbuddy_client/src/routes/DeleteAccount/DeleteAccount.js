@@ -5,7 +5,7 @@ import './DeleteAccount.css'
 
 export default class DeleteAccount extends React.Component{
   handleDeleteSuccess = () => {
-    document.location.assign('http://localhost:3000/home')
+    document.location.assign('https://capstone1budgetbuddyclient.jmjonemoore.now.sh/home')
   }
   render(){
   return(
