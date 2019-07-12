@@ -169,10 +169,19 @@ describe('Transactions Endpoints', () => {
   describe(`GET /api/transactions/:transaction_id`, () => {
 
     context(`Given no transactions`, () => {
+      const { testUsers } = makeUsersArray()
+      beforeEach('insert users', () => {
+        return db
+        .into('users')
+        .insert(testUsers)
+      })
+
       it(`responds with 404`, () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const transactionId = 123456
         return supertest(app)
         .get(`/api/transactions/${transactionId}`)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(404, {
           error: {
             message: `Transaction doesn't exist`
@@ -182,7 +191,7 @@ describe('Transactions Endpoints', () => {
     })
 
     context('Given there are transactions in the database', () => {
-      const testUsers = makeUsersArray()
+      const { testUsers } = makeUsersArray()
       const testCategories = makeCategoriesArray()
       const testTransactions = makeTransactionsArray()
 
@@ -203,16 +212,18 @@ describe('Transactions Endpoints', () => {
       })
 
       it('responds with 200 and the specified transaction', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const transactionId = 2
         const expectedTransaction = testTransactions[transactionId - 1]
         return supertest(app)
         .get(`/api/transactions/${transactionId}`)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(200, expectedTransaction)
       })
     })
 
     context(`Given an XSS attack Transaction`, () => {
-      const testUsers = makeUsersArray()
+      const { testUsers } = makeUsersArray()
       const testCategories = makeCategoriesArray()
       const maliciousTransaction = {
         id : 911,
@@ -240,8 +251,10 @@ describe('Transactions Endpoints', () => {
       })
 
       it('removes XSS attack content', () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         return supertest(app)
         .get(`/api/transactions/${maliciousTransaction.id}`)
+        .set(`Authorization`, makeAuthHeader(validCreds))
         .expect(200)
         .expect(res => {
           expect(res.body.title).to.eql(`Some food <img src="https://url.to.file.which/does-not.exist">`)
@@ -253,7 +266,7 @@ describe('Transactions Endpoints', () => {
 
 
     describe(`POST /api/transactions/user/:user_id`, () => {
-      const testUsers = makeUsersArray()
+      const { testUsers } = makeUsersArray()
       const testCategories = makeCategoriesArray()
 
       beforeEach('insert users and categories', () => {
@@ -268,6 +281,7 @@ describe('Transactions Endpoints', () => {
       })
 
       it(`creates a transaction, responding with 201 and the new transaction`, () => {
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const newTransaction = {
           title: 'New Transaction',
           amount: 5.00,
@@ -277,6 +291,7 @@ describe('Transactions Endpoints', () => {
         return supertest(app)
         .post(`/api/transactions/user/${newTransaction.user_id}`)
         .send(newTransaction)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(201)
         .expect(res => {
           expect(res.body.title).to.eql(newTransaction.title)
@@ -289,6 +304,7 @@ describe('Transactions Endpoints', () => {
         .then(postRes =>
           supertest(app)
           .get(`/api/transactions/${postRes.body.id}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(postRes.body)
           )
       })
@@ -304,12 +320,14 @@ describe('Transactions Endpoints', () => {
         }
 
         it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           delete newTransaction[field]
           const userId = 1
 
           return supertest(app)
           .post(`/api/transactions/user/${userId}`)
           .send(newTransaction)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(400, {
             error: {
               message: `Missing '${field}' in request body`
@@ -320,10 +338,12 @@ describe('Transactions Endpoints', () => {
       
       it('removes XSS attack content', () => {
         const { maliciousTransaction, expectedTransaction } = makeMaliciousTransaction()
+        const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
         const userId = 1
         return supertest(app)
         .post(`/api/transactions/user/${userId}`)
         .send(maliciousTransaction)
+        .set('Authorization', makeAuthHeader(validCreds))
         .expect(201)
         .expect(res => {
           expect(res.body.title).to.eql(expectedTransaction.title)
@@ -335,10 +355,19 @@ describe('Transactions Endpoints', () => {
 
     describe(`DELETE /api/transactions/:transaction_id`, () => {
       context('Given no transactions', () => {
+        const { testUsers } = makeUsersArray()
+        beforeEach('insert users', () => {
+          return db
+          .into('users')
+          .insert(testUsers)
+        })
+
         it(`responds with 404`, () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           const transactionId = 123456
           return supertest(app)
           .delete(`/api/transactions/${transactionId}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(404, {
             error: {
               message: `Transaction doesn't exist`
@@ -348,7 +377,7 @@ describe('Transactions Endpoints', () => {
       })
 
       context('Given there are transactions in the database', () => {
-        const testUsers = makeUsersArray()
+        const { testUsers } = makeUsersArray()
         const testCategories = makeCategoriesArray()
         const testTransactions = makeTransactionsArray()
 
@@ -369,14 +398,17 @@ describe('Transactions Endpoints', () => {
         })
 
         it('responds with 204 and removes the transaction', () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           const idToRemove = 2
           const expectedTransactions = testTransactions.filter(transaction => transaction.id !== idToRemove)
           return supertest(app)
           .delete(`/api/transactions/${idToRemove}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(204)
           .then(res => 
             supertest(app)
             .get(`/api/transactions`)
+            .set('Authorization', makeAuthHeader(validCreds))
             .expect(expectedTransactions))
         })
       })
@@ -386,10 +418,19 @@ describe('Transactions Endpoints', () => {
 
     describe(`PATCH /api/transactions/:transaction_id`, () => {
       context('Given no transactions', () => {
+        const { testUsers } = makeUsersArray()
+        beforeEach('insert users', () => {
+          return db
+          .into('users')
+          .insert(testUsers)
+        })
+
         it(`responds with 404`, () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           const transactionId = 123456
           return supertest(app)
           .patch(`/api/transactions/${transactionId}`)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(404, {
             error: {
               message: `Transaction doesn't exist`
@@ -399,7 +440,7 @@ describe('Transactions Endpoints', () => {
       })
 
       context('Given there are transactions in the database', () => {
-        const testUsers = makeUsersArray()
+        const { testUsers } = makeUsersArray()
         const testCategories = makeCategoriesArray()
         const testTransactions = makeTransactionsArray()
 
@@ -420,6 +461,7 @@ describe('Transactions Endpoints', () => {
         })
 
         it('responds with 204 and updates the transaction', () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           const idToUpdate = 2
           const updateTransaction = {
             title: 'New Transaction',
@@ -434,18 +476,22 @@ describe('Transactions Endpoints', () => {
           return supertest(app)
           .patch(`/api/transactions/${idToUpdate}`)
           .send(updateTransaction)
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(204)
           .then(res => 
             supertest(app)
             .get(`/api/transactions/${idToUpdate}`)
+            .set('Authorization', makeAuthHeader(validCreds))
             .expect(expectedTransaction))
         })
 
         it(`responds with 400 when no required fields supplied`, () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           const idToUpdate = 2
           return supertest(app)
           .patch(`/api/transactions/${idToUpdate}`)
           .send({ irrelevantField: 'foo'})
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(400, {
             error: {
               message: `Request body must contain either 'title', 'amount', 'user_id', 'category'`
@@ -454,6 +500,7 @@ describe('Transactions Endpoints', () => {
         })
 
         it(`responds with 204 when updating only a subset of fields`, () => {
+          const validCreds = { email: testUsers[0].email, user_password: testUsers[0].user_password}
           const idToUpdate = 2
           const updateTransaction = {
             amount: 25.00,
@@ -469,10 +516,12 @@ describe('Transactions Endpoints', () => {
             ...updateTransaction,
             fieldToIgnore: 'should not be in the GET response'
           })
+          .set('Authorization', makeAuthHeader(validCreds))
           .expect(204)
           .then(res => 
             supertest(app)
             .get(`/api/transactions/${idToUpdate}`)
+            .set('Authorization', makeAuthHeader(validCreds))
             .expect(expectedTransaction))
         })
       })

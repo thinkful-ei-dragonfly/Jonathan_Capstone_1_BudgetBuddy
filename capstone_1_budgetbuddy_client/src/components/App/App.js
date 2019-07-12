@@ -7,17 +7,28 @@ import { Route } from 'react-router-dom'
 import './App.css'
 import UserPage from '../../routes/UserPage/UserPage'
 import TransactionEntry from '../../routes/TransactionEntry/TransactionEntry'
+import TokenService from '../../services/token-service'
 
 
 class App extends React.Component {
 
   renderMainRoutes(){
+    const authorized = TokenService.hasAuthToken()
+    let page
+
+    if(authorized){
+      page = UserPage
+    }
+    else{
+      page = LandingPage
+    }
+
     return (
       <>
       <Route
       exact
       path='/'
-      component={LandingPage}
+      component={page}
       />
 
       <Route
@@ -38,7 +49,7 @@ class App extends React.Component {
       exact
       key='/home'
       path='/home'
-      component={UserPage}
+      component={page}
       />
 
       <Route
@@ -53,7 +64,7 @@ class App extends React.Component {
   render(){
   return (
     <div>
-    <Nav />
+    {/* <Nav /> */}
     <main className ='App_main'>
       {this.renderMainRoutes()}
     </main>

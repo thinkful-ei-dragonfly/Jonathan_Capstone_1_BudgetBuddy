@@ -146,6 +146,7 @@ describe('Users Endpoints', () => {
           .send(newUser)
           .expect(201)
           .expect(res => {
+            console.log(res.body)
             expect(res.body.first_name).to.eql(newUser.first_name)
             expect(res.body.last_name).to.eql(newUser.last_name)
             expect(res.body.email).to.eql(newUser.email)

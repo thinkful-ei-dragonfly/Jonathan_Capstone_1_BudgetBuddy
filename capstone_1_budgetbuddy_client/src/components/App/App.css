@@ -39,3 +39,9 @@ p {
 p + p {
   margin-top: 15px;
 }
+
+.submission-error{
+  color: red
+}
+
+

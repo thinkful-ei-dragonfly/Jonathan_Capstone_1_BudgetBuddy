@@ -69,10 +69,11 @@ usersRouter
             newUser
           )
             .then(user => {
+              
               return res
                 .status(201)
-                .location(path.posix.join(req.originalUrl, `/${user.id}`))
-                .json(serializeUser(user))
+                .location(path.posix.join(req.originalUrl, `/${user[0].id}`))
+                .json(serializeUser(user[0]))
             })
             .catch(next)
         }

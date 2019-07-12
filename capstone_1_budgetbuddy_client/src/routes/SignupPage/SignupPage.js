@@ -21,6 +21,7 @@ export default class SignupPage extends React.Component {
       user_password_valid: false,
       form_valid: false,
       hasError: false,
+      error: null,
       validationMessages: {
         first_name: '',
         last_name: '',
@@ -139,8 +140,11 @@ export default class SignupPage extends React.Component {
       .then(user => {
         this.props.history.push(`/login`)
       })
-      .catch(error => {
-        console.error({ error })
+      .catch(res => {
+        this.setState({
+          error: res.error
+        })
+        // console.error({ error })
       })
   }
   render() {
@@ -173,6 +177,7 @@ export default class SignupPage extends React.Component {
               {!email_valid && (
                     <p className="error">{validationMessages.email}</p>)}</label>
                 <input type="text" name='email' id='email' onChange={e => this.setEmail(e.target.value)} />
+                <p className="submission-error">{this.state.error}</p>
                 <ValidationError hasError={!this.state.email_valid} message={this.state.validationMessages.email} />
               </div>
               <div className='field'>
