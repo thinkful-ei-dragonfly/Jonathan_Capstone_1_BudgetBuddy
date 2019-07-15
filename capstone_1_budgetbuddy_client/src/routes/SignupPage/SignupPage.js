@@ -4,7 +4,6 @@ import MainHeader from '../../components/MainHeader/MainHeader'
 import ValidationError from '../../ValidationError/ValidationError'
 import BudgetBuddyForm from '../../components/BudgetBuddyForm/BudgetBuddyForm'
 import AuthApiService from '../../services/auth-api-service'
-import config from '../../config'
 import './SignupPage.css'
 
 export default class SignupPage extends React.Component {
@@ -176,14 +175,15 @@ export default class SignupPage extends React.Component {
               {!email_valid && (
                     <p className="error">{validationMessages.email}</p>)}</label>
                 <input type="text" name='email' id='email' onChange={e => this.setEmail(e.target.value)} />
-                <p className="submission-error">{this.state.error}</p>
                 <ValidationError hasError={!this.state.email_valid} message={this.state.validationMessages.email} />
               </div>
               <div className='field'>
                 <label htmlFor="password">Password
               {!user_password_valid && (
-                    <p className="error">{validationMessages.user_password}</p>)}</label>
+                    <p className="error">{validationMessages.user_password}</p>)}
+                    </label>
                 <input type="password" name='password' id='password' onChange={e => this.setPassword(e.target.value)} />
+                <p className="submission-error">{this.state.error}</p>
                 <ValidationError hasError={!this.state.user_password_valid} message={this.state.validationMessages.user_password} />
               </div>
               <button type='submit' disabled={!this.state.form_valid}>Sign Up</button>

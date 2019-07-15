@@ -7,7 +7,8 @@ import LoginButton from '../LoginButton/LoginButton';
 export default class MainHeader extends React.Component {
   handleLogoutClick = () => {
     TokenService.clearAuthToken()
-    document.location.assign('https://capstone1budgetbuddyclient.jmjonemoore.now.sh/login')
+    // document.location.assign('https://capstone1budgetbuddyclient.jmjonemoore.now.sh/login')
+    document.location.assign('http://localhost:3000/login')
   }
   renderLoginLink() {
     return (

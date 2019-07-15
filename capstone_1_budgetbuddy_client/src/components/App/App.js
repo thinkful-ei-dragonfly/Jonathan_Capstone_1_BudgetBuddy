@@ -3,8 +3,9 @@ import Footer from '../Footer/Footer'
 import LandingPage from '../../routes/LandingPage/LandingPage'
 import SignupPage from '../../routes/SignupPage/SignupPage'
 import LoginPage from '../../routes/LoginPage/LoginPage'
+import NotFoundPage from '../../routes/NotFoundPage/NotFoundPage'
 import DeleteAccount from '../../routes/DeleteAccount/DeleteAccount'
-import { Route } from 'react-router-dom'
+import { Route, Switch } from 'react-router-dom'
 import './App.css'
 import UserPage from '../../routes/UserPage/UserPage'
 import TransactionEntry from '../../routes/TransactionEntry/TransactionEntry'
@@ -38,6 +39,7 @@ class App extends React.Component {
 
     return (
       <>
+      <Switch>
       <Route
       exact
       key='/about'
@@ -90,7 +92,13 @@ class App extends React.Component {
       exact
       key='/delete_account'
       path='/delete_account'
-      component={deletePage}/>
+      component={deletePage}
+      />
+
+      <Route
+      component={NotFoundPage}
+      />
+      </Switch>
       </>
     )
   }

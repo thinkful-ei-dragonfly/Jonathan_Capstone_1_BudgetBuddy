@@ -3,7 +3,7 @@ import BudgetBuddyForm from '../BudgetBuddyForm/BudgetBuddyForm'
 import './LoginForm.css'
 import TokenService from '../../services/token-service'
 import AuthApiService from '../../services/auth-api-service'
-import ValidationError from '../../ValidationError/ValidationError'
+
 
 export default class LoginForm extends React.Component{
   static defaultProps = {

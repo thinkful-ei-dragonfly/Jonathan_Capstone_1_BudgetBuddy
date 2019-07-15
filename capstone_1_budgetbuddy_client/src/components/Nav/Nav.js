@@ -6,7 +6,8 @@ import './Nav.css'
 export default class Nav extends React.Component {
   handleLogoutClick = () => {
     TokenService.clearAuthToken()
-    document.location.assign('https://capstone1budgetbuddyclient.jmjonemoore.now.sh/')
+    // document.location.assign('https://capstone1budgetbuddyclient.jmjonemoore.now.sh/')
+    document.location.assign('http://localhost:3000/')
   }
   renderLoginLink() {
     return (

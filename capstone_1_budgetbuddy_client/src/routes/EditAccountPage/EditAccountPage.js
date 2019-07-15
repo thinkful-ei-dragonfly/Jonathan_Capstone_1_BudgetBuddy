@@ -14,10 +14,10 @@ export default class EditAccountPage extends React.Component{
       last_name: '',
       email: '',
       user_password: '',
-      first_name_valid: false,
-      last_name_valid: false,
-      email_valid: false,
-      user_password_valid: false,
+      first_name_valid: true,
+      last_name_valid: true,
+      email_valid: true,
+      user_password_valid: true,
       form_valid: false,
       hasError: false,
       error: null,
@@ -108,7 +108,7 @@ export default class EditAccountPage extends React.Component{
     let hasError = false
 
     user_password = user_password.replace(/[\s-]/g, '')
-    if (user_password < 7 || user_password === 0) {
+    if (user_password > 0 && user_password < 7) {
       fieldErrors.user_password = 'Password must be at least 8 characters long'
       user_password_valid = false
       hasError = true
@@ -123,27 +123,33 @@ export default class EditAccountPage extends React.Component{
 
   formValid() {
     this.setState({
-      form_valid: this.state.first_name_valid || this.state.last_name_valid || this.state.email_valid || this.state.user_password_valid
+      form_valid: this.state.first_name_valid && this.state.last_name_valid && this.state.email_valid && this.state.user_password_valid
     })
   }
 
   handleSubmit = e => {
     e.preventDefault()
-    const user = {
-      first_name: e.target['first-name'].value,
-      last_name: e.target['last-name'].value,
-      email: e.target['email'].value,
-      user_password: e.target['password'].value
+    let user = {}
+    if(e.target['first-name'].value !== ''){
+      user.first_name = e.target['first-name'].value
+    }
+    if(e.target['last-name'].value !== ''){
+      user.last_name = e.target['last-name'].value
+    }
+    if(e.target['email'].value !== ''){
+      user.email = e.target['email'].value
+    }
+    if(e.target['password'].value !== ''){
+      user.user_password = e.target['password'].value
     }
     AuthApiService.updateUser(user)
       .then(user => {
-        this.props.history.push(`/user`)
+        this.props.history.push(`/home`)
       })
       .catch(res => {
         this.setState({
           error: res.error
         })
-
       })
   }
 
@@ -163,21 +169,18 @@ export default class EditAccountPage extends React.Component{
               {!first_name_valid && (
                     <p className="error">{validationMessages.first_name}</p>)}</label>
                 <input placeholder='First Name' type="text" name='first-name' id='first-name' onChange={e => this.setFirstName(e.target.value)} />
-                <ValidationError hasError={!this.state.first_name_valid} message={this.state.validationMessages.first_name} />
               </div>
               <div className='field'>
                 <label htmlFor="last-name">Change Last name
               {!last_name_valid && (
                     <p className="error">{validationMessages.last_name}</p>)}</label>
                 <input type="text" name='last-name' id='last-name' placeholder='Last Name' onChange={e => this.setLastName(e.target.value)} />
-                <ValidationError hasError={!this.state.last_name_valid} message={this.state.validationMessages.last_name} />
               </div>
               <div className='field'>
                 <label htmlFor="username">Change Email
               {!email_valid && (
                     <p className="error">{validationMessages.email}</p>)}</label>
                 <input type="text" name='email' id='email' placeholder='email@email.com' onChange={e => this.setEmail(e.target.value)} />
-                <p className="submission-error">{this.state.error}</p>
                 <ValidationError hasError={!this.state.email_valid} message={this.state.validationMessages.email} />
               </div>
               <div className='field'>
@@ -185,6 +188,7 @@ export default class EditAccountPage extends React.Component{
               {!user_password_valid && (
                     <p className="error">{validationMessages.user_password}</p>)}</label>
                 <input type="password" name='password' id='password' placeholder='*******' onChange={e => this.setPassword(e.target.value)} />
+                <p className="submission-error">{this.state.error}</p>
                 <ValidationError hasError={!this.state.user_password_valid} message={this.state.validationMessages.user_password} />
               </div>
               <button type='submit' disabled={!this.state.form_valid}>Update</button>

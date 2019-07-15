@@ -41,11 +41,6 @@ const AuthApiService = {
       },
       body: JSON.stringify(user),
     })
-    .then(res => {
-      if(!res.ok)
-      return res.json().then(e => Promise.reject(e))
-      return res.json()
-    })
   },
 
   deleteUser(user_id){
